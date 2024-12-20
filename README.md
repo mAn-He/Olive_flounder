@@ -66,3 +66,10 @@ For Mask R-CNN or SAM comparisons:
 - Follow the instructions provided in the respective scripts.
 
 
+## References
+
+This repository references the training code and methods for DeepLabV3 from the following source:
+
+- M. S. Minhas, “Transfer Learning for Semantic Segmentation using PyTorch DeepLab v3,” GitHub.com/msminhas93, 12-Sep-2019. [Online]. Available: [DeepLabV3 Fine-Tuning Repository](https://github.com/msminhas93/DeepLabv3FineTuning).
+
+
