@@ -1,81 +1,68 @@
-README
+# Readme
 
-Overview
+## Overview
+This repository provides training scripts for semantic segmentation models, including **DeepLabV3**, **DeepLabV3+**, and **UNet**. The code is structured to accommodate different dataset configurations and segmentation tasks. Key highlights of the repository include:
 
-This repository provides training scripts for semantic segmentation models, including DeepLabV3, DeepLabV3+, and UNet. The code is structured to accommodate different dataset configurations and segmentation tasks. Key highlights of the repository include the comparison of segmentation model performance on various dataset setups and between traditional semantic segmentation and instance segmentation approaches.
+- Comparison of segmentation model performance on different dataset setups.
+- Evaluation of traditional semantic segmentation and instance segmentation approaches.
 
-Dataset Setup
+## Dataset Setup
 
-Dataset Types
+### Dataset Types
+- **01 Dataset**:
+  - `0`: Background
+  - `1`: Target
 
-01 Dataset:
+- **012 Dataset**:
+  - `0`: Background
+  - `1`: Non-OOI (Out-of-Interest) Target
+  - `2`: Target
 
-Label 0: Background
+## Tasks
 
-Label 1: Target
+### Task 1: Semantic Segmentation Model Comparison
+Compare the performance of models trained on:
 
-012 Dataset:
+1. **01 Dataset**
+2. **012 Dataset**
 
-Label 0: Background
-
-Label 1: Non-OOI (Out-of-Interest) Target
-
-Label 2: Target
-
-Tasks
-
-Task 1
-
-Objective:
-Compare the performance of semantic segmentation models trained using:
-
-01 Dataset
-
-012 Dataset
-
-Task 2
-
-Objective:
+### Task 2: Advanced Model Comparisons
 Evaluate and compare segmentation approaches between:
 
-012 Dataset-trained segmentation models
+1. **012 Dataset-trained segmentation models**
+2. **Instance segmentation models (e.g., Mask R-CNN)**
+3. **Segment Anything Model (SAM)**
 
-Instance segmentation models (e.g., Mask R-CNN)
+## Model References
 
-Segment Anything Model (SAM)
+### DeepLabV3
+- Implementation and training code: [DeepLabV3 Fine-Tuning Repository](https://github.com/msminhas93/DeepLabv3FineTuning)
 
-Model References
+### DeepLabV3+
+- Model details: [DeepLabV3+ in SMP Documentation](https://smp.readthedocs.io/en/v0.1.3/_modules/segmentation_models_pytorch/deeplabv3/model.html)
+- 
+- **`train/`**: Contains all training scripts for both tasks.
 
-DeepLabV3
 
-The implementation and training code for DeepLabV3 can be found here:
-DeepLabV3 Fine-Tuning Repository
 
-DeepLabV3+
+## How to Use
 
-For details on the DeepLabV3+ model implementation, refer to the SMP documentation:
-DeepLabV3+ in SMP Documentation
+### Training a Semantic Segmentation Model
+The base code is implemented for the **DeepLabV3** model. Additional scripts are available for:
 
-Repository Structure
+- **UNet**
+- **DeepLabV3+**
 
-train/
+To train a model:
 
-Contains training scripts for DeepLabV3, DeepLabV3+, and UNet models.
+1. **Prepare the dataset** in either **01** or **012** format.
+2. **Navigate** to the `train/` directory.
+3. **Execute** the script for the desired model with your configuration.
 
-Scripts are organized to handle 01 Dataset and 012 Dataset configurations for flexible experimentation.
+### Instance Segmentation Comparisons
+For Mask R-CNN or SAM comparisons:
 
-How to Use
+- Install the required dependencies.
+- Follow the instructions provided in the respective scripts.
 
-Training a Semantic Segmentation Model
 
-Ensure the dataset is prepared in the desired format (01 or 012).
-
-Navigate to the train/ directory.
-
-Select the desired model script (e.g., deeplabv3, deeplabv3_plus, or unet).
-
-Run the script using your configuration.
-
-Instance Segmentation Comparison
-
-For comparisons involving Mask R-CNN or SAM, ensure that the required dependencies are installed, and follow the instructions in the respective scripts for setup and execution.
