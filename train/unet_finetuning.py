@@ -16,14 +16,14 @@ global labels
 
 device = "cuda:1"
 
-# data 불러오기
+# load data
 label_data_path = "/home/fisher/DATA/GMISSION/annotations/annotation_v3.pkl"
 train_data_path = "/home/fisher/Peoples/hseung/NUBchi/Training/img/"
 mask_data_path = "/home/fisher/Peoples/hseung/NUBchi/Training/mask/"
 model_path = "/home/fisher/Peoples/suyeon/Paper/Unet/Save_model/"
 log_path = "/home/fisher/Peoples/suyeon/Paper/Unet/log/"
 
-datasize = len(os.listdir(train_data_path))
+data_size = len(os.listdir(train_data_path))
 
 class UnetDatahandler(Dataset):
     def __init__(self,
@@ -35,8 +35,8 @@ class UnetDatahandler(Dataset):
                  ):
         
         self.train_data_path = train_data_path
-        self.train_data_path_list = sorted(os.listdir(self.train_data_path))
-        self.filename_list = [t.split('.jpg')[0] for t in self.train_data_path_list if True]
+        self.train_data_filenames = sorted(os.listdir(self.train_data_path))
+        self.filename_list = [t.split('.jpg')[0] for t in self.train_data_filenames if True]
         self.mask_data_path = mask_data_path
         
         self.label_list = list(label.values())
@@ -53,12 +53,12 @@ class UnetDatahandler(Dataset):
         # filename = self.label_list[idx]['filename']
         image = cv2.imread(self.train_data_path + self.filename_list[idx] + '.jpg')
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image_pytorch = image.transpose((2, 0, 1))
+        image_numpy_HWC_to_CHW = image.transpose((2, 0, 1))
         
-        # NumPy 배열을 PyTorch 텐서로 변환
-        image_tensor = torch.from_numpy(image_pytorch).float()
+        # Convert NumPy array to PyTorch tensor
+        image_tensor = torch.from_numpy(image_numpy_HWC_to_CHW).float()
 
-        # 이미지를 정규화 (옵션)
+        # Normalize the image (optional)
         image_tensor /= 255.0
         
         # Create batched_input
@@ -84,13 +84,13 @@ class UnetDatahandler(Dataset):
 early_stopping = EarlyStopping(patience = 3, verbose = True)
 
 model = smp.Unet(encoder_weights = 'imagenet',
-                 in_channels=3,            # 입력 이미지 채널 수 (예: RGB 이미지는 3)
+                 in_channels=3,            # Number of input image channels (e.g., 3 for RGB image)
                  classes=1)
 
-# 저장된 모델 불러오기
+# Load saved model
 model.load_state_dict(torch.load("/home/fisher/Peoples/suyeon/Paper/Unet/Save_model/epoch_0.pth"))
 
-# 모델의 파라미터를 디바이스로 이동
+# Move model parameters to device
 model.to(device)
 
 with open(label_data_path,"rb") as fr:
@@ -153,9 +153,9 @@ for epoch in tqdm(range(epochs), desc='outer', position=0):
         outputs = outputs.squeeze()
                 
         loss = criterion(outputs, input_mask)
-        f1 = open(f"{log_path}log.txt", 'w')
-        f1.write(str(loss)+'\n')
-        f1.close()
+        log_file = open(f"{log_path}log.txt", 'w')
+        log_file.write(str(loss)+'\n')
+        log_file.close()
         epoch_loss = epoch_loss + loss
         # loss.requires_grad = True
         loss.backward()
@@ -180,13 +180,13 @@ for epoch in tqdm(range(epochs), desc='outer', position=0):
             loss = criterion(outputs, input_mask)
             val_loss += loss.item()
     
-    ### early stopping 여부를 체크하는 부분 ###
-    early_stopping(val_loss, model) # 현재 과적합 상황 추적
+    ### Part to check for early stopping ###
+    early_stopping(val_loss, model) # Track current overfitting status
     
-    if early_stopping.early_stop: # 조건 만족 시 조기 종료
+    if early_stopping.early_stop: # Early stop if condition is met
         break
     
-    epoch_mean_loss = epoch_loss/(datasize/batch_size)
+    epoch_mean_loss = epoch_loss/(data_size/batch_size)
     print(f"Epoch {epoch} Mean Loss = {epoch_mean_loss}")
     
     if best_loss > epoch_mean_loss or epoch == epochs-1:

@@ -3,11 +3,11 @@ from torchvision.models.segmentation.deeplabv3 import DeepLabHead
 from torchvision import models
 
 
-def createDeepLabv3(outputchannels=3):
+def create_deep_lab_v3(output_channels=3):
     """DeepLabv3 class with custom head
 
     Args:
-        outputchannels (int, optional): The number of output channels
+        output_channels (int, optional): The number of output channels
         in your dataset masks. Defaults to 1.
 
     Returns:
@@ -15,7 +15,7 @@ def createDeepLabv3(outputchannels=3):
     """
     model = models.segmentation.deeplabv3_resnet101(pretrained=False,
                                                     progress=False)
-    model.classifier = DeepLabHead(2048, outputchannels)
+    model.classifier = DeepLabHead(2048, output_channels)
     # Set the model in training mode
     model.train()
     return model

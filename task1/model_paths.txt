@@ -1,0 +1,12 @@
+(01)
+deeplab : '/home/fisher/Peoples/hseung/NEW/1st_Trial/new_learning_Rate/original.pt'
+deeplabv3plus :'/home/fisher/Peoples/hseung/SMP_PYROCH/exp/deeplabplus_30.pt'
+unet :'/home/fisher/Peoples/suyeon/Paper/Unet/Unet012/Save_model/epoch_50.pth'
+
+(012)
+deeplab : '/home/fisher/Peoples/hseung/NEW/1st_Trial/dataset_modified/no_pad_3class_3_zero_to_three_dataset3.pt'
+deeplabv3plus : '/home/fisher/Peoples/hseung/SMP_PYROCH/exp/deeplabplus_3mask_30.pt'
+unet : '/home/fisher/Peoples/suyeon/Paper/Unet/Unet012/Save_model/ES_epoch_9.pth'
+
+(instance)
+mask_Rcnn : '/home/fisher/Peoples/kcpark/saved_model/train_test_compare_epoch_100.pt'
