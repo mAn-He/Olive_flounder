@@ -38,12 +38,12 @@ import os # Moved to top
 
 # Local metric functions removed, will use utils.metrics
 
-img_folder =r'/home/fisher/Peoples/hseung/Full/img'
+img_folder =r'./Full/img'
 os.chdir(img_folder)
 filenames = os.listdir()
 test_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), filenames))) 
 # len(test_file)
-mask_folder = r'/home/fisher/Peoples/hseung/Full/mask'
+mask_folder = r'./Full/mask'
 os.chdir(mask_folder)
 mask_names = os.listdir()
 mask_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), mask_names)))

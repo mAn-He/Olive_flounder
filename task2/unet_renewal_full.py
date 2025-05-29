@@ -24,8 +24,8 @@ from utils import metrics # Import custom metrics
 
 warnings.filterwarnings('ignore')
 
-img_folder_path = r'/home/fisher/Peoples/hseung/Full/img'
-mask_folder_path = r'/home/fisher/Peoples/hseung/Full/mask'
+img_folder_path = r'./Full/img'
+mask_folder_path = r'./Full/mask'
 
 original_cwd = os.getcwd()
 os.chdir(img_folder_path)

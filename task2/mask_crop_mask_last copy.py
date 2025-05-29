@@ -78,8 +78,8 @@ with open('/home/fisher/Peoples/hseung/NEW/yolo_swin/pickles/test_bbox_annotatio
 
 mask_metrics_calculator = new_metric_by_s.MaskMetrics() # Instance for process_mask
 
-img_folder_path = r'/home/fisher/Peoples/hseung/Full/img'
-mask_folder_path = r'/home/fisher/Peoples/hseung/Full/mask'
+img_folder_path = r'./Full/img'
+mask_folder_path = r'./Full/mask'
 
 original_cwd = os.getcwd()
 os.chdir(img_folder_path) # Preserving original os.chdir logic for now

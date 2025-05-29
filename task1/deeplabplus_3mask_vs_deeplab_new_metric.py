@@ -18,11 +18,56 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor # Not use
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor # Not used
 
 from utils import metrics # Import custom metrics
-import argparse # New import
+import argparse
+import configparser
 
 warnings.filterwarnings('ignore')
 
-start = time.time()
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Evaluate DeepLabV3 and DeepLabV3+ (3-mask variant) models.")
+    parser.add_argument('--img_folder', type=str, default='./Full/img',
+                        help='Path to the main image folder.')
+    parser.add_argument('--mask_folder', type=str, default='./Full/mask',
+                        help='Path to the main mask folder.')
+    parser.add_argument('--model_paths_file', type=str, default='task1/model_paths.txt',
+                        help='Path to the text file containing model paths.')
+    parser.add_argument('--output_csv_file', type=str, 
+                        default='/home/fisher/Peoples/hseung/NEW/deeplabv3plus_output_metric/deeplabplus_3mask_vs_deeplab_metric_new.csv',
+                        help='Path for saving the output CSV metrics file.')
+    parser.add_argument('--output_image_folder', type=str, 
+                        default='/home/fisher/Peoples/hseung/NEW/segment outputs/deeplabv3_plus_vs_deeplab_3mask/',
+                        help='Path to save output images (if enabled).')
+    parser.add_argument('--model_set_key', type=str, default='012', choices=['01', '012'],
+                        help="Key for model set in model_paths.txt")
+    parser.add_argument('--device', type=str, default='cuda:2',
+                        help="Device for torch, e.g., 'cuda:0' or 'cpu'")
+    return parser.parse_args()
+
+def load_model_paths_from_config(file_path):
+    paths = {}
+    current_section = None
+    try:
+        with open(file_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'): # Skip empty lines and comments
+                    continue
+                if line.startswith('(') and line.endswith(')'):
+                    current_section = line[1:-1]
+                    paths[current_section] = {}
+                elif current_section and ':' in line:
+                    model_name, model_path_full = line.split(':', 1)
+                    model_path = model_path_full.strip().strip("'").strip('"') # Remove potential quotes
+                    paths[current_section][model_name.strip()] = model_path
+    except FileNotFoundError:
+        print(f"Error: Model paths file not found at {file_path}")
+        return None 
+    except Exception as e:
+        print(f"Error parsing model paths file {file_path}: {e}")
+        return None 
+    return paths
+
+start = time.time() # Original start time, script logic will be moved into a main() function in Part 2
 deeplab = torch.load(
                    r'/home/fisher/Peoples/hseung/NEW/1st_Trial/dataset_modified/no_pad_3class_3_zero_to_three_dataset3.pt',map_location=torch.device('cuda:2'))
 deeplabv3plus = torch.load(r'/home/fisher/Peoples/hseung/SMP_PYROCH/exp/deeplabplus_3mask_30.pt',map_location=torch.device('cuda:2'))
@@ -155,13 +200,19 @@ for file_index in range(len(test_file)):
 
 metric_df.to_csv('/home/fisher/Peoples/hseung/NEW/deeplabv3plus_output_metric/deeplabplus_3mask_vs_deeplab_metric_new.csv', index=False)
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Argument parser for model evaluation.")
-    parser.add_argument('--test_arg', type=str, default='hello', help='A test argument.')
-    return parser.parse_args()
+# The old parse_arguments function (test stub) is replaced by the new one above.
+# The if __name__ == "__main__": block is modified below.
 
 if __name__ == "__main__":
     args = parse_arguments()
-    print(f"Test argument: {args.test_arg}")
-    # Original script's main logic would eventually go here or be called from here
-    print("Original script logic would run after this.")
+    device_to_load = torch.device(args.device) 
+    all_model_paths = load_model_paths_from_config(args.model_paths_file)
+    
+    if all_model_paths is None:
+        exit()
+        
+    print("Argument parsing and model path loading setup complete.")
+    # The rest of the script's original global code (model loading, loops, etc.)
+    # currently still runs here, immediately after these prints.
+    # This will be addressed in Part 2 by moving that logic into a main() function
+    # and calling main() here.
