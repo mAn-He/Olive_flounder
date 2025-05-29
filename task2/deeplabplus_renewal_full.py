@@ -1,174 +1,166 @@
-from PIL import Image
-from torchvision import transforms
-import matplotlib.pyplot as plt
-import numpy as np
-from torch.nn import Softmax
-from torchmetrics.classification import Dice,BinaryAccuracy
-from torchmetrics import JaccardIndex
-from sklearn.metrics import f1_score, roc_auc_score,confusion_matrix
+import os
+import pickle
+import re
+import warnings
 
-# img_path ='/home/fisher/Peoples/hseung/Full/img/20220816_100GOPRO_G0020073.JPG'
-# '/home/fisher/Peoples/hseung/NEW/Train/img_same_no_pad/20220816_100GOPRO_G0050536_3.jpg'
-from PIL import Image
-from torchvision import transforms
+import matplotlib.pyplot as plt # Retained for saving figures
 import numpy as np
 import pandas as pd
-import warnings
-warnings.filterwarnings('ignore')
-# mask_files = 
-
 import torch
-import torchvision
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-import torch.nn as nn
-
-
-import os
-from PIL import ImageDraw
-import box_match
-
-
-img_folder =r'/home/fisher/Peoples/hseung/Full/img' 
-os.chdir(img_folder)
-filenames = os.listdir()
-test_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), filenames))) 
-# len(test_file)
-mask_folder = r'/home/fisher/Peoples/hseung/Full/mask'
-os.chdir(mask_folder)
-mask_names = os.listdir()
-mask_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), mask_names)))
-
-# 이제 모델을 사용하여 이미지에 대한 추론을 수행할 수 있습니다.
-deeplabv3plus = torch.load(r'/home/fisher/Peoples/hseung/SMP_PYROCH/exp/deeplabplus_3mask_30.pt',map_location=torch.device('cuda:1'))
-deeplabv3plus.eval()
-# metric_df = pd.DataFrame(columns=['File Name','Accuarcy', 'DIce', 'Jaccard', 'f1' 
-#                               ])# metric_df = pd.DataFrame(columns = ['Deep Lab Accuarcy','Mask Accuarcy', 'Deep DIce', 'Mask Dice', 'Deep Jaccard', 'Mask Jaccard', 'Deep f1', 'Mask F1'])
-from PIL import Image
+import torchvision # Retained
+from PIL import Image, ImageDraw
+from sklearn.metrics import f1_score
 from torchvision import transforms
-import matplotlib.pyplot as plt
-import numpy as np
-from torch.nn import Softmax
-import os 
-device = torch.device('cuda:1')
-import torch
-import new_metric_by_s
-metric= new_metric_by_s.MaskMetrics()
-img_folder =r'/home/fisher/Peoples/hseung/Full/img' 
-os.chdir(img_folder)
-filenames = os.listdir()
-test_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), filenames))) 
-import re
-test_file_word = [re.sub(r'\.JPG$', '', filename) for filename in test_file]
-mask_folder = r'/home/fisher/Peoples/hseung/Full/mask'
-os.chdir(mask_folder)
-mask_names = os.listdir()
-mask_file = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), mask_names)))
-import pickle
-with open('/home/fisher/Peoples/hseung/NEW/yolo_swin/pickles/test_bbox_annotation_modify.pkl', 'rb') as an_box:
-    data = pickle.load(an_box)
-for n in range(90,len(test_file)):
-     metric_dict = {}
-     img_path = img_folder + "/"+ test_file[n]
-     mask_path = mask_folder +"/" + mask_file[n]
-     mask_npy = np.load(mask_path)
-     mask=mask_npy
-     obj_ids = np.unique(mask)
-     # first id is the background, so remove it
-     obj_ids = obj_ids[1:]
+# Unused model and nn imports removed
 
-     # split the color-encoded mask into a set
-     # of binary masks
-     img = Image.open(img_path).convert('RGB')
-     masks = mask == obj_ids[:, None, None]
-     img_trans = transforms.ToTensor()(img).unsqueeze(0)
+from utils import metrics # Import custom metrics
 
-    #  mask_mask = a_mask[0]['masks'].cpu().numpy()
-     
-     new_name=test_file_word[n]
-     match_bboxes = []
-     match_box = {}
+warnings.filterwarnings('ignore')
 
-    #  print(f"filename = {new_name}")
-     true_bboxes = data[new_name] 
-     for m in range(len(true_bboxes)):
-        coords2= true_bboxes[m]
-        new_image = img.crop(true_bboxes[m])
-        new_image = new_image.convert('RGB')
-        new_image_target_size= new_image.size
-        new_image = new_image.resize((256,256))
-        newimg_trans = transforms.ToTensor()(new_image).unsqueeze(0)
-        with torch.no_grad():
-            b = deeplabv3plus(newimg_trans.to(torch.device('cuda:1')))
-        cc = np.argmax(np.squeeze(b).cpu().numpy(), 0)
-        plus_output = (cc==1)
-        # ground_resize = ground_mask.resize((256,256))
-        plus_output = (cc==1)
-        
-        plus_output_img = Image.fromarray((plus_output).astype(np.uint8))
-        plus_output_img = plus_output_img.resize(new_image_target_size)
-        deeplab_arr= np.array(plus_output_img)
-                
-        x_min, y_min, x_max, y_max = map(int, coords2)
-        y_min, y_max = y_min, y_min + deeplab_arr.shape[0]
-        x_min, x_max = x_min, x_min + deeplab_arr.shape[1]
-        target_size = img.size
-        blank = np.zeros((target_size[1],target_size[0]), dtype=int)
-        # print('넓이 :', abs(y_min-y_max),abs(x_min-x_max)) 
-        deeplab_arr = np.where(deeplab_arr==True, 1 ,0)
-        blank[y_min:y_max, x_min:x_max] = deeplab_arr
-                # new_name
-# '20220817_202GOPRO_G0084450'
-# 오류의 진원지
-        image_list = [img,masks[m],blank]
-            
- 
-        # crop_original = np.array(original_output)
-        # 제목 리스트
-        titles = ['Crop_Image','Crop_Ground','plus']
-        num_subplots = len(image_list)
+# --- Configuration Section ---
+img_folder_path = r'./Full/img'
+mask_folder_path = r'./Full/mask'
 
-    # 서브플롯 배치 설정
-        rows = 1
-        cols = num_subplots
+# Output paths remain absolute as per original script's structure.
+output_csv_path = '/home/fisher/Peoples/hseung/REAL_ARTICLE/deeplabplus_renewal_full1.csv'
+output_comparison_images_folder = f'/home/fisher/Peoples/hseung/REAL_ARTICLE/plus_output_full/' # Note: This path is still absolute
+pickle_path_bbox_annotations = '/home/fisher/Peoples/hseung/NEW/yolo_swin/pickles/test_bbox_annotation_modify.pkl'
+model_path_deeplabplus = r'/home/fisher/Peoples/hseung/SMP_PYROCH/exp/deeplabplus_3mask_30.pt'
 
-        # 서브플롯 생성
-        fig, axes = plt.subplots(rows, cols, figsize=(15, 5))
-        for i, ax in enumerate(axes):
-            ax.imshow(image_list[i])
-            ax.set_title(titles[i])
-            ax.axis('off')
-            ax.set_adjustable('box')  # 이미지 비율 유지
-            
-# # 제목 간 간격 조정
-        plt.subplots_adjust(top=0.8)
-        plt.savefig(f'/home/fisher/Peoples/hseung/REAL_ARTICLE/plus_output_full/{new_name}_{m}.png')
-        mask_pred= np.where(blank ==1, 1 ,0)
-        truee = np.where(masks[m]>0, 1,0)
-    mask_true= np.where(original_output==True,1,0)
+processing_device = torch.device('cuda:1') # Device for model and tensors
+# --- End Configuration Section ---
 
+# Load the DeepLabV3+ model
+try:
+    deeplabplus_model = torch.load(model_path_deeplabplus, map_location=processing_device)
+except FileNotFoundError:
+    print(f"Error: DeepLabV3+ model not found at {model_path_deeplabplus}")
+    exit()
+except Exception as e:
+    print(f"Error loading DeepLabV3+ model: {e}")
+    exit()
+deeplabplus_model.eval()
+deeplabplus_model.to(processing_device)
+
+# List and filter image files (os.chdir removed)
+try:
+    all_filenames_in_img_folder = os.listdir(img_folder_path)
+    test_file_list = sorted(list(filter(lambda x: ('20220817' in x) or ('20220819' in x), all_filenames_in_img_folder)))
+    if not test_file_list:
+        print(f"No matching image files found in {img_folder_path}")
+        exit()
+except FileNotFoundError:
+    print(f"Error: Image folder not found at '{img_folder_path}'.")
+    exit()
+
+metric_df = pd.DataFrame(columns=['File Name','Accuarcy', 'DIce', 'Jaccard', 'f1'])
+test_file_basenames = [re.sub(r'\.JPG$', '', filename, flags=re.IGNORECASE) for filename in test_file_list]
+
+try:
+    with open(pickle_path_bbox_annotations, 'rb') as an_box:
+        bbox_annotations_data = pickle.load(an_box)
+except FileNotFoundError:
+    print(f"Error: Bounding box annotations pickle file not found at {pickle_path_bbox_annotations}")
+    exit()
+except Exception as e:
+    print(f"Error loading bounding box annotations: {e}")
+    exit()
+
+# Main processing loop (starts from index 90 as per original script)
+for file_index in range(90, len(test_file_list)):
+    img_filename = test_file_list[file_index]
+    img_basename = test_file_basenames[file_index]
+
+    img_path = os.path.join(img_folder_path, img_filename)
+    mask_filename = img_basename + ".npy"
+    mask_path = os.path.join(mask_folder_path, mask_filename)
+
+    try:
+        mask_numpy_array = np.load(mask_path)
+    except FileNotFoundError:
+        print(f"Warning: Mask file '{mask_path}' not found for image '{img_filename}'. Skipping.")
+        continue
     
-    mask_pred= np.where(crop_rcnn_numpy==True, 1, 0)
-        pred_t = mask_pred
-        truee_t = truee
-        # truee_mask = torch.tensor(mask_true)
+    img_pil = Image.open(img_path).convert('RGB')
+    
+    obj_ids = np.unique(mask_numpy_array)
+    if len(obj_ids) <= 1:
+        print(f"Warning: No distinct objects found in mask for {img_filename}. Skipping.")
+        continue
+    obj_ids = obj_ids[1:]
+    object_masks_binary = mask_numpy_array == obj_ids[:, None, None]
 
-                # acc = BinaryAccuracy().to(torch.device('cuda:2'))
-                # print('Deep lab의 구성 : ', np.unique(deep_pred))
-        # 'File Name','Accuarcy', 'DIce', 'Jaccard','f1'
+    if img_basename not in bbox_annotations_data:
+        print(f"Warning: No bounding box annotation for {img_basename}. Skipping image.")
+        continue
+    true_bboxes_for_image = bbox_annotations_data[img_basename]
+
+    for bbox_idx, true_bbox_coords in enumerate(true_bboxes_for_image):
+        cropped_img_pil = img_pil.crop(true_bbox_coords)
+        cropped_img_pil = cropped_img_pil.convert('RGB')
+        original_crop_size = cropped_img_pil.size
+        
+        resized_cropped_img_pil = cropped_img_pil.resize((256, 256))
+        input_tensor = transforms.ToTensor()(resized_cropped_img_pil).unsqueeze(0).to(processing_device)
+
+        with torch.no_grad():
+            raw_model_output = deeplabplus_model(input_tensor)
+        
+        # Process model output (assuming 3-mask output, take argmax for class)
+        output_argmax = np.argmax(np.squeeze(raw_model_output).cpu().numpy(), 0)
+        prediction_binary_map_resized = (output_argmax == 1) # Assuming class 1 is the target
+        
+        prediction_pil = Image.fromarray(prediction_binary_map_resized.astype(np.uint8) * 255)
+        prediction_resized_to_original_crop = prediction_pil.resize(original_crop_size)
+        prediction_array_original_crop_size = np.array(prediction_resized_to_original_crop) / 255
+        prediction_array_original_crop_size = prediction_array_original_crop_size.astype(np.uint8)
+
+        x_min, y_min, _, _ = map(int, true_bbox_coords)
+        crop_height, crop_width = prediction_array_original_crop_size.shape
+        
+        final_prediction_full_image = np.zeros((img_pil.size[1], img_pil.size[0]), dtype=np.uint8)
+        
+        place_y_start = y_min
+        place_y_end = min(y_min + crop_height, img_pil.size[1])
+        place_x_start = x_min
+        place_x_end = min(x_min + crop_width, img_pil.size[0])
+        
+        src_crop_height = place_y_end - place_y_start
+        src_crop_width = place_x_end - place_x_start
+
+        final_prediction_full_image[place_y_start:place_y_end, place_x_start:place_x_end] = \
+            prediction_array_original_crop_size[0:src_crop_height, 0:src_crop_width]
+        
+        if bbox_idx < len(object_masks_binary):
+            ground_truth_roi_binary = object_masks_binary[bbox_idx].astype(np.uint8)
+        else:
+            print(f"Warning: bbox_idx {bbox_idx} out of bounds for object_masks_binary for {img_filename}. Skipping object.")
+            continue
+        
+        # Minimal plotting for verification
+        if output_comparison_images_folder:
+            os.makedirs(output_comparison_images_folder, exist_ok=True)
+            fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+            axes[0].imshow(img_pil); axes[0].set_title(f'Original Full Img: {img_basename}')
+            axes[1].imshow(ground_truth_roi_binary, cmap='gray'); axes[1].set_title(f'GT Obj {bbox_idx}')
+            axes[2].imshow(final_prediction_full_image, cmap='gray'); axes[2].set_title(f'Pred Obj {bbox_idx} (Full)')
+            for ax_item in axes: ax_item.axis('off')
+            plt.subplots_adjust(top=0.85)
+            plot_savename = f'{img_basename}_{bbox_idx}_comparison.png'
+            plt.savefig(os.path.join(output_comparison_images_folder, plot_savename))
+            plt.close(fig)
+        
         metric_dict = {
-            'File Name': f'{new_name}_{m}',
-            'Accuarcy': metric.accuracy(truee_t,pred_t).item(),
-            # 'Deep origin Accuarcy': accuracy(truee_t,mask_pred_t).item(),
-            'DIce': metric.dice_coef(truee_t, pred_t).item(),
-            # 'origin Dice': dice_coef(truee_t, mask_pred_t).item(),
-            'Jaccard': metric.iou(truee_t,pred_t).item(),
-            # 'origin Jaccard': iou(truee_t, mask_pred_t).item(),
-            'f1': f1_score(truee, mask_pred, average='macro',zero_division=1).item(),
-            # 'origin F1': f1_score(truee_t, mask_pred, average='macro',zero_division=1).item()
+            'File Name': f'{img_basename}_{bbox_idx}',
+            'Accuarcy': metrics.accuracy(ground_truth_roi_binary, final_prediction_full_image),
+            'DIce': metrics.dice_coefficient(ground_truth_roi_binary, final_prediction_full_image),
+            'Jaccard': metrics.iou_score(ground_truth_roi_binary, final_prediction_full_image),
+            'f1': f1_score(ground_truth_roi_binary.flatten(), final_prediction_full_image.flatten(), average='binary', zero_division=1),
         }
         metric_df = pd.concat([metric_df, pd.DataFrame([metric_dict])], ignore_index=True)
 
+if not metric_df.empty:
+    metric_df = metric_df.reset_index(drop=True)
+metric_df.to_csv(output_csv_path, index=False)
 
-        #  metric_df = metric_df.reset_index(True)
-metric_df.to_csv('/home/fisher/Peoples/hseung/REAL_ARTICLE/deeplabplus_renewal_full1.csv', index=False)
+print(f"Processing complete. Metrics saved to {output_csv_path}")

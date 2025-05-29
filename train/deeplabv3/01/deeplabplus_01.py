@@ -260,7 +260,7 @@ from torch import randint, tensor
 import torch.nn.functional as F
 import warnings
 import itertools
-def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
+def train_model(model, criterion, dataloaders, optimizer, metrics, base_path,
                 num_epochs):
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -276,7 +276,7 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
     fieldnames = ['epoch', 'Train_loss', 'Test_loss'] + \
         [f'Train_{m}_{n}' for m,n in itertools.product(metrics.keys(),range(0,1))] + \
         [f'Test_{m}_{n}' for m,n in itertools.product(metrics.keys(),range(0,1))]
-    with open(os.path.join(bpath, 'deeplabv3plus_30_01epoch_cross.csv'), 'w', newline='') as csvfile:
+    with open(os.path.join(base_path, 'deeplabv3plus_30_01epoch_cross.csv'), 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -317,8 +317,8 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
                         if name == 'f1_score':
 
                             batchsummary[f'{phase}_{name}_0'].append(
-                                metric(y_true > 0, y_pred > 0.8,average='binary'))          
-                            # 5는 내가 직접 만든 ㅈㄴ체 mean 값      
+                                metric(y_true > 0, y_pred > 0.8,average='binary'))
+                            # 5 is the mean value I manually created
                        
                         elif name =='auroc':
 
@@ -375,7 +375,7 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
         for field in fieldnames[3:]:
             batchsummary[field] = np.mean(batchsummary[field])
         # print(batchsummary)
-        with open(os.path.join(bpath, 'deeplabv3plus_30_01epoch_cross.csv'), 'a', newline='') as csvfile:
+        with open(os.path.join(base_path, 'deeplabv3plus_30_01epoch_cross.csv'), 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writerow(batchsummary)
             # deep copy the model
@@ -397,7 +397,7 @@ _ = train_model(model,
                 criterion,
                 dataloaders,
                 optimizer,
-                bpath=exp_directory,
+                base_path=exp_directory,
                 metrics=metrics,
                 num_epochs=30)
 
