@@ -1,129 +1,54 @@
-# Semantic Segmentation Model Training and Evaluation
+# AI-Based Anomaly Detection & Segmentation in Aquaculture
 
-## Overview
-This repository offers a collection of Python scripts designed to streamline the training and evaluation of various semantic segmentation models, such as DeepLabV3, DeepLabV3+, and UNet. The primary goal is to facilitate research, development, and benchmarking in semantic segmentation by providing a flexible framework for experimentation across different dataset configurations and model comparison tasks.
+> A project that overcomes the performance limitations of semantic segmentation models by resolving the ambiguity of overlapping object labels through a Data-Centric approach.
 
-## Project Structure
-- **`task1/`**: Scripts for comparing semantic segmentation models (e.g., DeepLabV3 vs. DeepLabV3+).
-  - `model_paths.txt`: Configuration file storing paths to pre-trained model files. Used by evaluation scripts in `task1`.
-- **`task2/`**: Scripts for more advanced model comparisons, potentially involving instance segmentation or other models.
-- **`train/`**: Training scripts for different models and dataset types.
-  - `deeplabv3/01/`: Training scripts for DeepLabV3 on '01' type datasets.
-  - `deeplabv3/012/`: Training scripts for DeepLabV3 on '012' type datasets.
-- **`utils/`**: Utility modules.
-  - `metrics.py`: Common image segmentation metric calculation functions (Accuracy, Dice, IoU).
+<br>
 
-## Dataset Setup
-The project uses two main types of dataset configurations:
+## 1. Problem
+The performance of a semantic segmentation model for aquaculture fish stagnated at an F1 Score of 81.9% due to the ambiguity in data labels. Particularly in cases where objects overlap, the conventional binary labeling method made it difficult for the model to learn clear boundaries, thus limiting performance improvement.
 
--   **01 Dataset**:
-    -   `0`: Background
-    -   `1`: Target class
--   **012 Dataset**: (Often used for 3-class segmentation)
-    -   `0`: Background
-    -   `1`: Non-OOI (Out-of-Interest) Target / First target class
-    -   `2`: Target / Second target class
+<br>
 
-Prepare your datasets with images and corresponding single-channel masks where pixel values represent class IDs.
+## 2. My Solution
+Instead of introducing a larger, more complex model, this project adopted a **Data-Centric approach**, focusing on the root cause of the problem: the data itself. By improving the quality and structure of the data, the model was enabled to learn from more explicit information.
 
-## Setup and Dependencies
+#### Architecture & Key Features
+-   **Redefined Labeling Strategy**: Without changing the model, we transitioned from a standard `'01' dataset` (`0`: Background, `1`: Object) to a new `'012' dataset`. This was achieved by redefining overlapping objects as a **'Third Class (2)'**, which resolved data ambiguity and enabled the model to learn more precise segmentation.
+-   **Novel Evaluation Protocol**: A new evaluation protocol was designed to objectively validate the effectiveness of the new labeling method and to allow for a fair comparison against large-scale models like SAM.
+-   **Flexible Experimentation Framework**: This repository provides a flexible framework for training and evaluating various models (DeepLabV3, DeepLabV3+, UNet) on both '01' (2-class) and '012' (3-class) dataset configurations.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository_url>
-    cd <repository_directory>
-    ```
-2.  **Create a Python virtual environment (recommended):**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-3.  **Install dependencies:**
-    A `requirements.txt` file is not yet available. Key dependencies include:
-    -   PyTorch (torch, torchvision)
-    -   NumPy
-    -   Pandas
-    -   Matplotlib
-    -   Scikit-learn
-    -   OpenCV (cv2) - Often used for image processing.
-    -   Click (for command-line interfaces in training scripts)
-    Install them using pip:
-    ```bash
-    pip install torch torchvision torchaudio numpy pandas matplotlib scikit-learn opencv-python click
-    ```
-    *Ensure you install a PyTorch version compatible with your CUDA setup if using GPU.*
+![image](http://googleusercontent.com/file_content/11)
+*Visual comparison of the original (left) vs. proposed (right) labeling and prediction results.*
 
-## How to Use
+<br>
 
-### 1. Training Models (in `train/` directory)
+## 3. Impact & Results
+-   **Maximized Model Performance**: The Data-Centric approach alone boosted the **F1 Score by 7.8%p** (from 81.9% to 89.7%) under the conventional evaluation protocol.
+-   **Superiority of the Approach**: Under our new, custom-designed evaluation protocol, our method outperformed the large-scale SAM model by a significant **13.5%p**.
+-   **Cost-Efficient Problem Solving**: This project serves as a strong case study, proving that AI system performance limits can be overcome by improving data quality alone, without resorting to expensive model changes or additional computational resources.
 
-The primary training script is `train/deeplabv3/01/main.py` (and its counterpart in `train/deeplabv3/012/`). These use `click` for command-line configuration.
+| Evaluation Protocol | Model | F1 Score | IoU | Dice | Accuracy |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Conventional (2-Class)** | Baseline (DeepLabV3) | 81.9% | - | - | - |
+| | **Proposed (Trained on 3-Class)** | **89.7%** | **-** | **-** | **-** |
+| **Proposed (3-Class)** | SAM (Large Model) | 84.9% | - | - | - |
+| | **Proposed (DeepLabV3)** | **98.4%** | **-** | **-** | **-** |
 
-**Example: Training DeepLabV3 on an '01' dataset:**
+*Note: IoU, Dice, and Accuracy metrics are included for completeness as they are common in segmentation tasks, but specific values were not detailed in the source documents. The core improvement is demonstrated by the F1 Score.*
+
+<br>
+
+## 4. How to Use
+
+#### a. Setup
 ```bash
-python train/deeplabv3/01/main.py \
-    --data-directory /path/to/your/01_dataset_type/Train \
-    --exp_directory /path/to/save/trained_models_and_logs \
-    --epochs 30 \
-    --batch-size 4
-```
--   `--data-directory`: Path to your training data (images and masks folders).
--   `--exp_directory`: Where trained model checkpoints (`.pt` files) and logs will be saved.
--   `--epochs`: Number of training epochs.
--   `--batch-size`: Training batch size.
+# 1. Clone the repository
+git clone <repository_url>
+cd <repository_directory>
 
-Other training scripts like `train/unet_finetuning.py` or for DeepLabV3+ variants exist but may require code inspection for specific parameters.
+# 2. Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
-### 2. Evaluating Models (in `task1/` directory)
-
-Scripts in `task1/` are used to evaluate and compare pre-trained models.
-The script `task1/deeplabplus01_vs_deeplab_new_metric.py` has been refactored to use command-line arguments for paths.
-
-**Model Path Configuration:**
-Create or verify `task1/model_paths.txt`. This file lists the paths to your pre-trained model files (`.pt`). Example format:
-```
-(01)
-deeplab : '/path/to/your/deeplab_model_for_01_dataset.pt'
-deeplabv3plus :'/path/to/your/deeplabplus_model_for_01_dataset.pt'
-
-(012)
-deeplab : '/path/to/your/deeplab_model_for_012_dataset.pt'
-deeplabv3plus : '/path/to/your/deeplabplus_3mask_model_for_012_dataset.pt'
-```
-
-**Example: Running `task1/deeplabplus01_vs_deeplab_new_metric.py`:**
-```bash
-python task1/deeplabplus01_vs_deeplab_new_metric.py \
-    --img_folder /path/to/full/evaluation/images \
-    --mask_folder /path/to/full/evaluation/masks \
-    --model_paths_file task1/model_paths.txt \
-    --output_csv_file /path/to/output/results.csv \
-    --output_image_folder /path/to/save/comparison_images/ \
-    --model_set_key "012" \
-    --device "cuda:0"
-```
--   `--img_folder`: Path to evaluation images.
--   `--mask_folder`: Path to evaluation masks.
--   `--model_paths_file`: Path to the `model_paths.txt` file.
--   `--output_csv_file`: Path to save the CSV file containing performance metrics.
--   `--output_image_folder`: (Optional) Path to save visual comparison images.
--   `--model_set_key`: Which set of models to use from `model_paths.txt` (e.g., "01" or "012").
--   `--device`: PyTorch device (e.g., "cuda:0", "cpu").
-
-**Note on other scripts:**
-*Other evaluation scripts like `task1/deeplabplus_3mask_vs_deeplab_new_metric.py` and those in `task2/` currently have hardcoded paths. These were not refactored due to tool limitations during the process. You may need to modify them directly to set correct paths.*
-
-**Output:**
-Evaluation scripts typically generate:
--   A CSV file with detailed metrics per image/object (Accuracy, Dice, IoU, F1-score).
--   Optionally, saved image files showing visual comparisons of model segmentations against ground truth.
-
-## Original Model References
--   DeepLabV3: [DeepLabV3 Fine-Tuning Repository by msminhas93](https://github.com/msminhas93/DeepLabv3FineTuning)
--   DeepLabV3+: [SMP Documentation](https://smp.readthedocs.io/en/v0.1.3/_modules/segmentation_models_pytorch/deeplabv3/model.html)
-
-## TODO
--   Add comprehensive docstrings to all scripts and functions.
--   Complete path refactoring for all evaluation scripts.
--   Generate a `requirements.txt` file.
-```
+# 3. Install dependencies (Install PyTorch compatible with your CUDA setup)
+pip install torch torchvision torchaudio numpy pandas matplotlib scikit-learn opencv-python click
