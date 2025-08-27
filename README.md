@@ -1,4 +1,4 @@
-
+<img width="2400" height="1350" alt="image" src="https://github.com/user-attachments/assets/0a2c84cd-ef9d-40e5-b64c-1f91a863783a" />
 # AI-Based Anomaly Detection & Segmentation in Aquaculture
 
 > A project that overcomes the performance limitations of semantic segmentation models by resolving the ambiguity of overlapping object labels through a Data-Centric approach.
@@ -18,7 +18,8 @@ Instead of introducing a larger, more complex model, this project adopted a **Da
 -   **Novel Evaluation Protocol**: A new evaluation protocol was designed to objectively validate the effectiveness of the new labeling method and to allow for a fair comparison against large-scale models like SAM.
 -   **Flexible Experimentation Framework**: This repository provides a flexible framework for training and evaluating various models (DeepLabV3, DeepLabV3+, UNet) on both '01' (2-class) and '012' (3-class) dataset configurations.
 
-![image](http://googleusercontent.com/file_content/11)
+<img width="2400" height="1350" alt="image" src="https://github.com/user-attachments/assets/d33c4583-d3f5-444f-8511-d50f0c465b22" />
+
 *Visual comparison of the original (left) vs. proposed (right) labeling and prediction results.*
 
 <br>
