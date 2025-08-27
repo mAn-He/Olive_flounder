@@ -1,3 +1,6 @@
+Of course. I have restored the "How to Use" section and compiled all the information into a complete README file in English, with the results split into separate tables as you requested.
+
+````markdown
 # AI-Based Anomaly Detection & Segmentation in Aquaculture
 
 > A project that overcomes the performance limitations of semantic segmentation models by resolving the ambiguity of overlapping object labels through a Data-Centric approach.
@@ -5,7 +8,7 @@
 <br>
 
 ## 1. Problem
-The performance of a semantic segmentation model for aquaculture fish stagnated at an F1 Score of 81.9% due to ambiguity in data labels. Particularly in cases where objects overlap, the conventional binary labeling method made it difficult for the model to learn clear boundaries, thus limiting performance improvement.
+The performance of a semantic segmentation model for aquaculture fish stagnated at an **F1 Score of 81.9%** due to ambiguity in data labels. Particularly in cases where objects overlap, the conventional binary labeling method made it difficult for the model to learn clear boundaries, thus limiting performance improvement.
 
 <br>
 
@@ -17,9 +20,7 @@ Instead of introducing a larger, more complex model, this project adopted a **Da
 -   **Novel Evaluation Protocol**: A new evaluation protocol was designed to objectively validate the effectiveness of the new labeling method and to allow for a fair comparison against large-scale models like SAM.
 -   **Flexible Experimentation Framework**: This repository provides a flexible framework for training and evaluating various models (DeepLabV3, DeepLabV3+, UNet) on both '01' (2-class) and '012' (3-class) dataset configurations.
 
-<img width="2400" height="1350" alt="image" src="https://github.com/user-attachments/assets/66168651-9099-4faf-b821-b72db4e873b7" />
-
-
+![image](http://googleusercontent.com/file_content/11)
 *Visual comparison of the original (left) vs. proposed (right) labeling and prediction results.*
 
 <br>
@@ -52,8 +53,8 @@ This table compares our proposed method against the large-scale SAM model using 
 #### a. Setup
 ```bash
 # 1. Clone the repository
-git clone <repository_url>
-cd <repository_directory>
+git clone [https://github.com/mAn-He/Olive_flounder.git](https://github.com/mAn-He/Olive_flounder.git)
+cd Olive_flounder
 
 # 2. Create and activate a virtual environment
 python -m venv venv
@@ -61,3 +62,52 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
 # 3. Install dependencies (Install PyTorch compatible with your CUDA setup)
 pip install torch torchvision torchaudio numpy pandas matplotlib scikit-learn opencv-python click
+````
+
+#### b. Training Models
+
+Use the scripts in the `train/` directory to train your models.
+**Example: Training DeepLabV3 on a '01' type dataset:**
+
+```bash
+python train/deeplabv3/01/main.py \
+    --data-directory /path/to/your/01_dataset_type/Train \
+    --exp_directory /path/to/save/trained_models_and_logs \
+    --epochs 30 \
+    --batch-size 4
+```
+
+#### c. Evaluating Models
+
+Use the scripts in the `task1/` directory to evaluate and compare pre-trained models.
+
+**1. Configure Model Paths:**
+Specify the paths to your trained models in the `task1/model_paths.txt` file.
+
+```text
+(01)
+deeplab : '/path/to/your/deeplab_model_for_01_dataset.pt'
+deeplabv3plus :'/path/to/your/deeplabplus_model_for_01_dataset.pt'
+
+(012)
+deeplab : '/path/to/your/deeplab_model_for_012_dataset.pt'
+deeplabv3plus : '/path/to/your/deeplabplus_3mask_model_for_012_dataset.pt'
+```
+
+**2. Run Evaluation Script:**
+
+```bash
+python task1/deeplabplus01_vs_deeplab_new_metric.py \
+    --img_folder /path/to/full/evaluation/images \
+    --mask_folder /path/to/full/evaluation/masks \
+    --model_paths_file task1/model_paths.txt \
+    --output_csv_file /path/to/output/results.csv \
+    --output_image_folder /path/to/save/comparison_images/ \
+    --model_set_key "012" \
+    --device "cuda:0"
+```
+
+The script will generate a CSV file with performance metrics and optional visual comparison images.
+
+```
+```
