@@ -1,6 +1,4 @@
-Of course. I have restored the "How to Use" section and compiled all the information into a complete README file in English, with the results split into separate tables as you requested.
 
-````markdown
 # AI-Based Anomaly Detection & Segmentation in Aquaculture
 
 > A project that overcomes the performance limitations of semantic segmentation models by resolving the ambiguity of overlapping object labels through a Data-Centric approach.
