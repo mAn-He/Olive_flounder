@@ -1,4 +1,4 @@
-<img width="2400" height="1350" alt="image" src="https://github.com/user-attachments/assets/0a2c84cd-ef9d-40e5-b64c-1f91a863783a" />
+
 # AI-Based Anomaly Detection & Segmentation in Aquaculture
 
 > A project that overcomes the performance limitations of semantic segmentation models by resolving the ambiguity of overlapping object labels through a Data-Centric approach.
