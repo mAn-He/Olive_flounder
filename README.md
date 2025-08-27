@@ -52,7 +52,7 @@ This table compares our proposed method against the large-scale SAM model using 
 #### a. Setup
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/mAn-He/Olive_flounder.git](https://github.com/mAn-He/Olive_flounder.git)
+git clone https://github.com/mAn-He/Olive_flounder.git
 cd Olive_flounder
 
 # 2. Create and activate a virtual environment
